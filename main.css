@@ -1,0 +1,22 @@
+#background-container {
+    background-color: grey;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#canvas-container {
+    width: 700px;
+    height: 350px;
+    background: white;
+}
+
+canvas {
+    width: 700px;
+    height: 350px;
+}
