@@ -1,0 +1,5 @@
+{
+    "execmap": {
+        "ts": "ts-node"
+    }
+}

@@ -2,14 +2,17 @@
 <html lang="en">
     <head>
         <title>Drawer JS</title>
-        <script src="main.js"></script>
         <link rel="stylesheet" href="main.css">
     </head>
     <body>
         <div id="background-container">
             <div id="canvas-container">
+                <div class="slider-container">
+                    <input type="range" min="1" max="50" val="25" class="slider" id="slider">
+                </div>
                 <canvas id="canvas"></canvas>               
             </div>
         </div>
+        <script src="dist/index.js" type="module"></script>
     </body>   
 </html>
