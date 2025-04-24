@@ -2,17 +2,18 @@
 <html lang="en">
     <head>
         <title>Drawer JS</title>
-        <link rel="stylesheet" href="main.css">
+        <link rel="stylesheet" href="index.css">
     </head>
     <body>
         <div id="background-container">
             <div id="canvas-container">
                 <div class="slider-container">
-                    <input type="range" min="1" max="50" val="25" class="slider" id="slider">
+                    <input type="range" min="1" max="20" val="10" class="slider" id="slider">
+                    <input type="color" id="stroke-color" name="stroke-color" value="#ff0000">
                 </div>
                 <canvas id="canvas"></canvas>               
-            </div>
         </div>
-        <script src="dist/index.js" type="module"></script>
+        <script>var exports = {}</script>
+        <script type="module" src="dist/index.js"></script>
     </body>   
 </html>
