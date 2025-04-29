@@ -1,13 +1,17 @@
-import { Mode } from './constants.js';
-
+import { Ellipse } from './shapes/ellipse.js';
+import { Rect } from './shapes/rect.js';
+import { Shape } from './shapes/shape.js';
 
 let canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, dpi;
 let slider: HTMLInputElement;
+let strokeColorElement: HTMLInputElement;
 let rect: DOMRect;
 let radius = 10;
 
 let width = 700;
 let height = 350;
+
+let strokeColor = '#FF0000'
 
 
 function getCanvasWidth(htmlCanvas: HTMLCanvasElement) {
@@ -37,36 +41,85 @@ const handleMouseClick = (e: MouseEvent) => {
     ctx.fill();
 }
 
-let currentMode = Mode.STROKE;
+let currentMode: String = 'rect';
+
+let isShiftPressed = false;
 let isMouseDown = false;
+
+let currentShape: Shape;
 
 const handleMouseDown = (e: MouseEvent) => {
     console.log("mouse down");
     isMouseDown = true;
-    // drawPenStroke(event.offsetX, event.offsetY, radius);
     ctx.beginPath();
-    ctx.moveTo(getCanvasX(e), getCanvasY(e));
     console.log(getCanvasX(e) + "," + getCanvasY(e));
+
+    const canvasX = getCanvasX(e), canvasY = getCanvasY(e);
+    
+    switch (currentMode) {
+        case 'stroke': {
+            ctx.moveTo(canvasX, canvasY);
+            // drawPenStroke(event.offsetX, event.offsetY, radius);
+        }
+        case 'ellipse': {
+            currentShape = new Ellipse();
+            if (!(currentShape instanceof Ellipse)) {
+                return;
+            }
+            currentShape.setCorner1BoundingBox(canvasX, canvasY);
+        }
+        case 'rect': {
+            currentShape = new Rect();
+            if (!(currentShape instanceof Rect)) {
+                return;
+            }
+
+            currentShape.setCorner1BoundingBox(canvasX, canvasY);
+        }
+    }
 }
 
 const handleMouseMove = (e: MouseEvent) => {
-    if (isMouseDown) {
-        console.log("mouse moving");
-        switch (currentMode) {
-            case Mode.STROKE: {
-                console.log(getCanvasX(e) + ', ' + getCanvasY(e));
-                // drawPenStroke(getCanvasX(e), getCanvasY(e), radius);
-                ctx.lineTo(getCanvasX(e), getCanvasY(e));
-            }
+    if (!isMouseDown) {
+        return;
+    }
+    
+    const canvasX = getCanvasX(e), canvasY = getCanvasY(e);
+    console.log("mouse moving");
+    switch (currentMode) {
+        case 'stroke': {
+            console.log(canvasX + ', ' + canvasY);
+            // drawPenStroke(getCanvasX(e), getCanvasY(e), radius);
+            ctx.lineTo(canvasX, canvasY);
         }
-        
     }
 }
 
 const handleMouseUp = (e: MouseEvent) => {
     console.log("mouse up");
-    ctx.stroke();
     isMouseDown = false;
+
+    const canvasX = getCanvasX(e), canvasY = getCanvasY(e);
+    console.log(canvasX + ',' + canvasY);
+    switch (currentMode) {
+        case 'ellipse': {
+            if (!(currentShape instanceof Ellipse)) {
+                return;
+            }
+            currentShape.setCorner2BoundingBox(canvasX, canvasY);
+            currentShape.setEllipseFromBoundingBox(e.shiftKey);
+            currentShape.draw(ctx);
+        }
+        case 'rect': {
+            if (!(currentShape instanceof Rect)) {
+                return;
+            }
+            currentShape.setCorner2BoundingBox(canvasX, canvasY);
+            currentShape.setRectFromBoundingBox(e.shiftKey);
+            currentShape.draw(ctx);
+        }
+    }
+    ctx.stroke();
 }
 
 function drawPenStroke(x: number, y: number, r: number) {
@@ -78,6 +131,10 @@ function drawPenStroke(x: number, y: number, r: number) {
 }
 
 
+function clearCanvas() {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+}
+
 
 // SETUP
 function setupSlider()  {
@@ -87,6 +144,15 @@ function setupSlider()  {
         ctx.lineWidth = +slider.value;
         console.log(radius);
     });
+}
+
+function setupStrokeColorElement() {
+    strokeColorElement = document.getElementById('stroke-color') as HTMLInputElement;
+    strokeColorElement.value = strokeColor;
+    ctx.strokeStyle = 'red';
+    strokeColorElement?.addEventListener('input', () => {
+        ctx.strokeStyle = strokeColorElement.value;
+    })
 }
 
 function setupCanvas() {
@@ -105,13 +171,13 @@ function setupCanvas() {
     ctx.scale(dpi, dpi);
 
     rect = canvas.getBoundingClientRect();
-
 }
 
 const setup = () => {
     console.log("Setting Up");
-    setupSlider();
     setupCanvas();
+    setupSlider();
+    setupStrokeColorElement();
 
     console.log("window loaded");
 }
@@ -120,6 +186,8 @@ document?.addEventListener('DOMContentLoaded', () => {setup()});
 document?.addEventListener('mousedown', handleMouseDown);
 document?.addEventListener('mousemove', handleMouseMove);
 document?.addEventListener('mouseup', handleMouseUp);
+document?.addEventListener('keydown', handleKeyDown);
+document?.addEventListener('keyup', handleKeyUp);
 
 
 
