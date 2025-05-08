@@ -14,4 +14,32 @@
     width: 700px;
     height: 350px;
     background: white;
+    float: left;
+}
+
+.inline {
+    display: inline-block;
+}
+
+.vert-top {
+    vertical-align: top;
+}
+
+.btn {
+   color: lightgray; 
+   padding: 5px;
+   border-radius: 15px;
+   margin-bottom: 5px;
+}
+
+.btn:hover {
+    box-shadow: 0 0 4px lightgray;
+}
+
+.selected {
+    background-color: #3d6981;
+}
+
+.not-selected {
+    background-color: #333333;
 }

@@ -1,10 +1,14 @@
 import { Ellipse } from './shapes/ellipse.js';
 import { Rect } from './shapes/rect.js';
 import { Shape } from './shapes/shape.js';
+import { Stroke } from './shapes/stroke.js';
+
+import { Commands } from './commands.js';
 
 let canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, dpi;
 let slider: HTMLInputElement;
 let strokeColorElement: HTMLInputElement;
+let selectedBtn: HTMLDivElement;
 let rect: DOMRect;
 let radius = 10;
 
@@ -23,17 +27,17 @@ function getCanvasHeight(htmlCanvas: HTMLCanvasElement) {
     
 }
 
-function getCanvasX(e: MouseEvent) {
+function getCanvasX(e: PointerEvent) {
     return e.clientX - rect?.x; 
 }
 
-function getCanvasY(e: MouseEvent) {
+function getCanvasY(e: PointerEvent) {
     return e.clientY - rect?.y; 
 }
 
 // Handle Mouse Click Events
 
-const handleMouseClick = (e: MouseEvent) => {
+const handleMouseClick = (e: PointerEvent) => {
     if (!ctx) return;
     ctx.beginPath();
     ctx.fillStyle = 'red';
@@ -41,74 +45,141 @@ const handleMouseClick = (e: MouseEvent) => {
     ctx.fill();
 }
 
-let currentMode: String = 'rect';
+let currentMode: String = 'stroke';
 
 let isShiftPressed = false;
 let isMouseDown = false;
 
-let currentShape: Shape;
+let currentShape: Shape | null = null;
 
-const handleMouseDown = (e: MouseEvent) => {
+const commands = new Commands();
+
+const handlePointerDown = (e: PointerEvent) => {
     console.log("mouse down");
     isMouseDown = true;
-    ctx.beginPath();
     console.log(getCanvasX(e) + "," + getCanvasY(e));
 
     const canvasX = getCanvasX(e), canvasY = getCanvasY(e);
+    currentShape = null;
     
     switch (currentMode) {
         case 'stroke': {
-            ctx.moveTo(canvasX, canvasY);
-            // drawPenStroke(event.offsetX, event.offsetY, radius);
+            currentShape = new Stroke();
+            console.log(currentShape);
+            if (!(currentShape instanceof Stroke)) {
+                break;
+            }
+            currentShape.addPoint(canvasX, canvasY);
+            break;
         }
         case 'ellipse': {
             currentShape = new Ellipse();
             if (!(currentShape instanceof Ellipse)) {
-                return;
+                break;
             }
             currentShape.setCorner1BoundingBox(canvasX, canvasY);
+            break;
         }
         case 'rect': {
             currentShape = new Rect();
             if (!(currentShape instanceof Rect)) {
-                return;
+                break;
             }
 
             currentShape.setCorner1BoundingBox(canvasX, canvasY);
+            break;
         }
+    }
+
+    if (currentShape !== null) {
+        commands.addCommand('add', currentShape);
     }
 }
 
-const handleMouseMove = (e: MouseEvent) => {
+const handlePointerMove = (e: PointerEvent) => {
     if (!isMouseDown) {
         return;
     }
+
+    removePointerDownUpCallBack();
     
+    clearCanvas();
     const canvasX = getCanvasX(e), canvasY = getCanvasY(e);
     console.log("mouse moving");
+
+    console.log(currentShape);
+    console.log(currentMode);
     switch (currentMode) {
         case 'stroke': {
-            console.log(canvasX + ', ' + canvasY);
-            // drawPenStroke(getCanvasX(e), getCanvasY(e), radius);
-            ctx.lineTo(canvasX, canvasY);
+    console.log('stroke');
+            if (!(currentShape instanceof Stroke)) {
+                break;
+            }
+            currentShape.addPoint(canvasX, canvasY);
+            // ctx.save();
+            // ctx.fillStyle = 'red';
+            // ctx.strokeStyle = 'none';
+            // currentShape.draw(ctx);
+            // ctx.restore();
+            break;
+        }
+        case 'ellipse': {
+    console.log('ellipse');
+            if (!(currentShape instanceof Ellipse)) {
+                break;
+            }
+            const ellipse = currentShape as Ellipse;
+            ellipse.setCorner2BoundingBox(canvasX, canvasY);
+            ellipse.setEllipseFromBoundingBox(e.shiftKey);
+            // ellipse.draw(ctx);
+            break;
+        }
+        case 'rect': {
+    console.log('rect');
+            if (!(currentShape instanceof Rect)) {
+                break;
+            }
+
+            currentShape.setCorner2BoundingBox(canvasX, canvasY);
+            currentShape.setRectFromBoundingBox(e.shiftKey);
+            // currentShape.draw(ctx);
+            break;
         }
     }
+    console.log("after");
+    for (var shape of commands.getShapes()) {
+        shape.draw(ctx);
+    }
+    addPointerDownUpCallback();
 }
 
-const handleMouseUp = (e: MouseEvent) => {
+const handlePointerUp = (e: PointerEvent) => {
     console.log("mouse up");
     isMouseDown = false;
 
     const canvasX = getCanvasX(e), canvasY = getCanvasY(e);
     console.log(canvasX + ',' + canvasY);
     switch (currentMode) {
+        case 'stroke': {
+            console.log(currentShape);
+            if (!(currentShape instanceof Stroke)) {
+                return;
+            }
+            ctx.save();
+            ctx.fillStyle = 'red';
+            currentShape.addPoint(canvasX, canvasY);
+            // currentShape.draw(ctx);
+            // ctx.arc(canvasX, canvasY, radius, 0, Math.PI * 2);
+            ctx.restore();
+
+        }
         case 'ellipse': {
             if (!(currentShape instanceof Ellipse)) {
                 return;
             }
             currentShape.setCorner2BoundingBox(canvasX, canvasY);
             currentShape.setEllipseFromBoundingBox(e.shiftKey);
-            currentShape.draw(ctx);
+            // currentShape.draw(ctx);
         }
         case 'rect': {
             if (!(currentShape instanceof Rect)) {
@@ -116,10 +187,12 @@ const handleMouseUp = (e: MouseEvent) => {
             }
             currentShape.setCorner2BoundingBox(canvasX, canvasY);
             currentShape.setRectFromBoundingBox(e.shiftKey);
-            currentShape.draw(ctx);
+            // currentShape.draw(ctx);
         }
     }
-    ctx.stroke();
+    for (var shape of commands.getShapes()) {
+        shape.draw(ctx);
+    }
 }
 
 function drawPenStroke(x: number, y: number, r: number) {
@@ -160,6 +233,7 @@ function setupCanvas() {
     canvas = document.getElementById('canvas') as HTMLCanvasElement;
     if (!canvas) return;
     ctx = canvas.getContext('2d')!;
+    clearCanvas();
     
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
@@ -173,21 +247,58 @@ function setupCanvas() {
     rect = canvas.getBoundingClientRect();
 }
 
+function setupButtons() {
+    // Button Setup
+    var btns = document.getElementsByClassName('btn') as HTMLCollectionOf<HTMLDivElement>;
+    for (let btn of btns) {
+        if (btn.id == 'stroke') {
+            selectedBtn = btn;
+        } 
+        btn.addEventListener('click', () => {
+
+            function deselect(button: HTMLDivElement) {
+                console.log(button);
+                button.classList.remove('selected');
+                button.classList.add('not-selected');
+            }
+
+            function select(button: HTMLDivElement) {
+                console.log(button);
+                button.classList.remove('not-selected');
+                button.classList.add('selected');
+            }
+            
+            deselect(selectedBtn);
+            select(btn);
+            currentMode = btn.id;
+        });
+    }
+}
+
+function addPointerDownUpCallback() {
+    console.log("adding up down callback");
+    document?.addEventListener('pointerdown', handlePointerDown);
+    document?.addEventListener('pointerup', handlePointerUp);
+}
+function removePointerDownUpCallBack() {
+    console.log("removing up down callback");
+    document?.removeEventListener('pointerdown', handlePointerDown);
+    document?.removeEventListener('pointerup', handlePointerUp);
+}
+
 const setup = () => {
     console.log("Setting Up");
     setupCanvas();
     setupSlider();
     setupStrokeColorElement();
+    setupButtons();
 
     console.log("window loaded");
 }
 
 document?.addEventListener('DOMContentLoaded', () => {setup()});
-document?.addEventListener('mousedown', handleMouseDown);
-document?.addEventListener('mousemove', handleMouseMove);
-document?.addEventListener('mouseup', handleMouseUp);
-document?.addEventListener('keydown', handleKeyDown);
-document?.addEventListener('keyup', handleKeyUp);
+addPointerDownUpCallback();
+document?.addEventListener('pointermove', handlePointerMove);
 
 
 

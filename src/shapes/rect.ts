@@ -71,37 +71,39 @@ export class Rect extends Shape {
 
     // functionality
     draw(ctx: CanvasRenderingContext2D) {
+        ctx.beginPath();
         console.log(this.leftCorner.getX() + "," + this.leftCorner.getY() + "," + this.width + "," + this.height);
         ctx.rect(this.leftCorner.getX(), this.leftCorner.getY(), this.width, this.height);
+        ctx.stroke();
     }
 
     setRectFromBoundingBox(isSquare: boolean) {
-        const widthDiff = this.corner1.getX() - this.corner2.getX();
-        const heightDiff = this.corner1.getY() - this.corner2.getY();
+        const widthDiff = this.corner2.getX() - this.corner1.getX();
+        const heightDiff = this.corner2.getY() - this.corner1.getY();
 
         const widthDiffAbs = Math.abs(widthDiff);
         const heightDiffAbs = Math.abs(heightDiff);
 
         if (isSquare) {
-            const min = Math.min(widthDiffAbs, heightDiffAbs);
             const widthPositivity = widthDiff > 0 ? 1 : -1;
             const heightPositivity = heightDiff > 0 ? 1 : -1;
-            this.leftCorner.setPoints(
-                this.corner1.getX() + (widthPositivity * min),
-                this.corner1.getY() + (heightPositivity * min)
+            
+            this.corner2.setPoints(
+                this.corner1.getX() + (widthPositivity * heightDiffAbs),
+                this.corner1.getY() + (heightPositivity * heightDiffAbs)
             )
 
-            this.width = min;
-            this.height = min;
+            this.width = heightDiffAbs;
+            this.height = heightDiffAbs;
         } else {
-            this.leftCorner.setPoints(
-                Math.min(this.corner1.getX(), this.corner2.getX()),
-                Math.min(this.corner1.getY(), this.corner2.getY())
-            );
-
             this.width = widthDiffAbs;
             this.height = heightDiffAbs;
         }
+
+        this.leftCorner.setPoints(
+            Math.min(this.corner1.getX(), this.corner2.getX()),
+            Math.min(this.corner1.getY(), this.corner2.getY())
+        );
     }
 
     getShape(): string {

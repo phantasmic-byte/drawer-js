@@ -70,8 +70,10 @@ export class Ellipse extends Shape {
 
     // functionality
     draw(ctx: CanvasRenderingContext2D) {
+        ctx.beginPath();
         console.log(this.center.getX() + "," + this.center.getY() + "," + this.width + "," + this.height);
         ctx.ellipse(this.center.getX(), this.center.getY(), this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
+        ctx.stroke();
     }
 
     setEllipseFromBoundingBox(isCircle: boolean) {
@@ -82,16 +84,15 @@ export class Ellipse extends Shape {
         const heightDiffAbs = Math.abs(heightDiff);
 
         if (isCircle) {
-            const max = Math.max(widthDiffAbs, heightDiffAbs);
             const widthPositivity = widthDiff > 0 ? 1 : -1;
             const heightPositivity = heightDiff > 0 ? 1 : -1; 
             this.center.setPoints(
-                this.corner1.getX() + (widthPositivity * max)/2,
-                this.corner1.getY() + (heightPositivity * max)/2
+                this.corner1.getX() + (widthPositivity * heightDiffAbs)/2,
+                this.corner1.getY() + (heightPositivity * heightDiffAbs)/2
             );
             
-            this.width = max;
-            this.height = max;
+            this.width = heightDiffAbs;
+            this.height = heightDiffAbs;
         } else {
             this.center.setPoints(
                 (this.corner1.getX() + this.corner2.getX()) / 2,
