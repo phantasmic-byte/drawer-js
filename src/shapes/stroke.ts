@@ -8,8 +8,8 @@ export class Stroke extends Shape {
 
     private numBetween: number = 10;
 
-    constructor() {
-        super();
+    constructor(strokeStyle?: string, fillStyle?: string, isFill?: boolean) {
+        super(strokeStyle, fillStyle, isFill);
         this.points = [];
     }
 

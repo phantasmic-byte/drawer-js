@@ -10,10 +10,10 @@
             <div id="canvas-container">
                 <div class="slider-container">
                     <input type="range" min="1" max="20" val="10" class="slider" id="slider">
-                    <input type="color" id="stroke-color" name="stroke-color" value="#ff0000">
+                    <input type="color" id="colourPicker" name="colourPicker" value="#ff0000">
                 </div>
-                <div>
-                    <div class="inline vert-top">
+                <div class="horizontal">
+                    <div class="vert-top">
                         <div id="stroke" class="btn selected">
                             <i class='bx bx-pencil bx-lg'></i>
                         </div>
@@ -24,7 +24,16 @@
                             <i class='bx bx-square bx-lg'></i>
                         </div>
                     </div>
-                    <div class="inline"><canvas id="canvas"></canvas></div>
+                    <div id="canvas-holder">
+                        <canvas id="canvas-temp"></canvas>
+                        <canvas id="canvas"></canvas>
+                    </div>
+                    <div class="vert-top">
+                        <div id="color-picker">
+                            <div class="inline" id ="color-square"></div>
+                            <div class="inline" id ="hue-picker"></div>
+                        </div>
+                    </div>
                 </div>
                                
         </div>

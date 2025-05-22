@@ -9,8 +9,8 @@ export class Rect extends Shape {
     private corner1: Point;
     private corner2: Point;
 
-    constructor(x?: number, y?: number, w?: number, h?: number) {
-        super();
+    constructor(x?: number, y?: number, w?: number, h?: number, strokeStyle?: string, fillStyle?: string, isFill?: boolean) {
+        super(strokeStyle, fillStyle, isFill);
         this.leftCorner = x && y ? new Point(x, y) : new Point();
         this.width = w ? w : 0;
         this.height = h ? h : 0;
@@ -71,10 +71,17 @@ export class Rect extends Shape {
 
     // functionality
     draw(ctx: CanvasRenderingContext2D) {
+        ctx.save();
         ctx.beginPath();
         console.log(this.leftCorner.getX() + "," + this.leftCorner.getY() + "," + this.width + "," + this.height);
         ctx.rect(this.leftCorner.getX(), this.leftCorner.getY(), this.width, this.height);
+
+        ctx.strokeStyle = this.getStrokeStyle();
+        if (this.getIsFill()) {
+            ctx.fillStyle = this.getFillStyle();
+        }
         ctx.stroke();
+        ctx.restore();
     }
 
     setRectFromBoundingBox(isSquare: boolean) {

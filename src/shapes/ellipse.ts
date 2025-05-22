@@ -9,8 +9,8 @@ export class Ellipse extends Shape {
     private corner1: Point;
     private corner2: Point;
 
-    constructor(x?: number, y?: number, w?: number, h?: number) {
-        super();
+    constructor(x?: number, y?: number, w?: number, h?: number, strokeStyle?: string, fillStyle?: string, isFill?: boolean) {
+        super(strokeStyle, fillStyle, isFill);
         this.center = x && y ? new Point(x, y) : new Point();
         this.width = w ? w : 0;
         this.height = h ? h : 0;
@@ -70,10 +70,19 @@ export class Ellipse extends Shape {
 
     // functionality
     draw(ctx: CanvasRenderingContext2D) {
+        console.log('drawing with ');
+        console.log(ctx);
+        ctx.save();
         ctx.beginPath();
         console.log(this.center.getX() + "," + this.center.getY() + "," + this.width + "," + this.height);
         ctx.ellipse(this.center.getX(), this.center.getY(), this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
+        
+        ctx.strokeStyle = this.getStrokeStyle();
+        if (this.getIsFill()) {
+            ctx.fillStyle = this.getFillStyle();
+        }
         ctx.stroke();
+        ctx.restore();
     }
 
     setEllipseFromBoundingBox(isCircle: boolean) {

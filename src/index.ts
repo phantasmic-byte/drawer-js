@@ -10,13 +10,15 @@ let slider: HTMLInputElement;
 let strokeColorElement: HTMLInputElement;
 let selectedBtn: HTMLDivElement;
 let rect: DOMRect;
+
+let canvasTemp: HTMLCanvasElement, ctxTemp: CanvasRenderingContext2D, dpiTemp;
+
 let radius = 10;
 
 let width = 700;
 let height = 350;
 
 let strokeColor = '#FF0000'
-
 
 function getCanvasWidth(htmlCanvas: HTMLCanvasElement) {
     return htmlCanvas.width;
@@ -103,7 +105,7 @@ const handlePointerMove = (e: PointerEvent) => {
 
     removePointerDownUpCallBack();
     
-    clearCanvas();
+    clearTempCanvas();
     const canvasX = getCanvasX(e), canvasY = getCanvasY(e);
     console.log("mouse moving");
 
@@ -147,9 +149,10 @@ const handlePointerMove = (e: PointerEvent) => {
         }
     }
     console.log("after");
-    for (var shape of commands.getShapes()) {
-        shape.draw(ctx);
-    }
+    // for (var shape of commands.getShapes()) {
+        // shape.draw(ctx);
+    // }
+    currentShape?.draw(ctxTemp);
     addPointerDownUpCallback();
 }
 
@@ -159,8 +162,10 @@ const handlePointerUp = (e: PointerEvent) => {
 
     const canvasX = getCanvasX(e), canvasY = getCanvasY(e);
     console.log(canvasX + ',' + canvasY);
+    console.log(currentMode);
     switch (currentMode) {
         case 'stroke': {
+            console.log('stroke');
             console.log(currentShape);
             if (!(currentShape instanceof Stroke)) {
                 return;
@@ -171,28 +176,37 @@ const handlePointerUp = (e: PointerEvent) => {
             // currentShape.draw(ctx);
             // ctx.arc(canvasX, canvasY, radius, 0, Math.PI * 2);
             ctx.restore();
+            break;
 
         }
         case 'ellipse': {
+            console.log('ellipse x');
+            console.log(currentShape);
             if (!(currentShape instanceof Ellipse)) {
                 return;
             }
             currentShape.setCorner2BoundingBox(canvasX, canvasY);
             currentShape.setEllipseFromBoundingBox(e.shiftKey);
             // currentShape.draw(ctx);
+            break;
         }
         case 'rect': {
+            console.log('rect');
+            console.log(currentShape);
             if (!(currentShape instanceof Rect)) {
                 return;
             }
             currentShape.setCorner2BoundingBox(canvasX, canvasY);
             currentShape.setRectFromBoundingBox(e.shiftKey);
             // currentShape.draw(ctx);
+            break;
         }
     }
-    for (var shape of commands.getShapes()) {
-        shape.draw(ctx);
-    }
+    // for (var shape of commands.getShapes()) {
+        // shape.draw(ctx);
+    // }
+    // clearTempCanvas();
+    currentShape?.draw(ctx);
 }
 
 function drawPenStroke(x: number, y: number, r: number) {
@@ -204,10 +218,13 @@ function drawPenStroke(x: number, y: number, r: number) {
 }
 
 
-function clearCanvas() {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+function clearTempCanvas() {
+    ctxTemp.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 
+function clearCanvas() {
+ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+}
 
 // SETUP
 function setupSlider()  {
@@ -220,12 +237,12 @@ function setupSlider()  {
 }
 
 function setupStrokeColorElement() {
-    strokeColorElement = document.getElementById('stroke-color') as HTMLInputElement;
+    /* strokeColorElement = document.getElementById('stroke-color') as HTMLInputElement;
     strokeColorElement.value = strokeColor;
     ctx.strokeStyle = 'red';
     strokeColorElement?.addEventListener('input', () => {
         ctx.strokeStyle = strokeColorElement.value;
-    })
+    }) */
 }
 
 function setupCanvas() {
@@ -245,6 +262,22 @@ function setupCanvas() {
     ctx.scale(dpi, dpi);
 
     rect = canvas.getBoundingClientRect();
+    
+    // Temp Canvas Setup
+    canvasTemp = document.getElementById('canvas-temp') as HTMLCanvasElement;
+    if (!canvasTemp) return;
+    ctxTemp = canvasTemp.getContext('2d')!;
+    clearTempCanvas();
+    
+    canvasTemp.style.width = width + "px";
+    canvasTemp.style.height = height + "px";
+    
+    dpiTemp = window.devicePixelRatio;
+    
+    canvasTemp.width = Math.floor(width * dpiTemp);
+    canvasTemp.height = Math.floor(height * dpiTemp);
+    ctxTemp.scale(dpiTemp, dpiTemp);
+
 }
 
 function setupButtons() {
