@@ -71,17 +71,13 @@ export class Rect extends Shape {
 
     // functionality
     draw(ctx: CanvasRenderingContext2D) {
-        ctx.save();
-        ctx.beginPath();
-        console.log(this.leftCorner.getX() + "," + this.leftCorner.getY() + "," + this.width + "," + this.height);
-        ctx.rect(this.leftCorner.getX(), this.leftCorner.getY(), this.width, this.height);
-
-        ctx.strokeStyle = this.getStrokeStyle();
-        if (this.getIsFill()) {
-            ctx.fillStyle = this.getFillStyle();
-        }
-        ctx.stroke();
-        ctx.restore();
+        console.log("rect");
+        super.draw(
+            ctx,
+            (ctx: CanvasRenderingContext2D) => {
+                ctx.rect(this.leftCorner.getX(), this.leftCorner.getY(), this.width, this.height);
+            }
+        );
     }
 
     setRectFromBoundingBox(isSquare: boolean) {

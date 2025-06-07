@@ -70,19 +70,12 @@ export class Ellipse extends Shape {
 
     // functionality
     draw(ctx: CanvasRenderingContext2D) {
-        console.log('drawing with ');
-        console.log(ctx);
-        ctx.save();
-        ctx.beginPath();
-        console.log(this.center.getX() + "," + this.center.getY() + "," + this.width + "," + this.height);
-        ctx.ellipse(this.center.getX(), this.center.getY(), this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
-        
-        ctx.strokeStyle = this.getStrokeStyle();
-        if (this.getIsFill()) {
-            ctx.fillStyle = this.getFillStyle();
-        }
-        ctx.stroke();
-        ctx.restore();
+        super.draw(
+            ctx,
+            (ctx: CanvasRenderingContext2D) => {                
+                ctx.ellipse(this.center.getX(), this.center.getY(), this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
+            }
+        ); 
     }
 
     setEllipseFromBoundingBox(isCircle: boolean) {

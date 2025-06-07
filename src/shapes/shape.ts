@@ -1,6 +1,5 @@
 export abstract class Shape {
     abstract getShape(): string;
-    abstract draw(ctx: CanvasRenderingContext2D): void;
     private strokeStyle: string;
     private fillStyle: string;
     private isFill: boolean;
@@ -22,5 +21,30 @@ export abstract class Shape {
 
     getIsFill() {
         return this.isFill;
+    }
+    
+
+    draw(ctx: CanvasRenderingContext2D, 
+        drawFn?: (ctx: CanvasRenderingContext2D) => void,
+        isStroke?: boolean
+    ): void {
+        console.log("super");
+        ctx.save();
+        ctx.beginPath();
+
+        if (drawFn) {
+            drawFn(ctx);
+        } 
+
+        ctx.strokeStyle = this.getStrokeStyle();
+        if (this.getIsFill()) {
+            ctx.fillStyle = this.getFillStyle();
+        }
+        ctx.stroke();
+
+        if(isStroke == true) {
+            ctx.closePath();
+        }
+        ctx.restore();
     }
 }
