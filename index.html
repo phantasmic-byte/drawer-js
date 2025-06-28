@@ -28,13 +28,46 @@
                         <canvas id="canvas-temp"></canvas>
                         <canvas id="canvas"></canvas>
                     </div>
-                    <div class="vert-top">
+                    <div class="vert-top" id="color-widget">
                         <div id="color-picker">
                             <div class="inline" id ="gradient-square">
                                 <div id="gradient-picker"></div>    
                             </div>
                             <div class="inline" id ="hue-rect">
                                 <div id="hue-picker"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="color-slider" id="r-slider">
+                                <div id="r-const" class="const">R</div>
+                                <input id="r-input" class="val-input" type="range" min="0" max="255" val="255">
+                                <div id="r-val" class="val">255</div>
+                            </div>
+                            <div class="color-slider" id="g-slider">
+                                <div id="g-const" class="const">G</div>
+                                <input id="g-input" class="val-input" type="range" min="0" max="255" val="0">
+                                <div id="g-val" class="val">0</div>
+                            </div>
+                            <div class="color-slider" id="b-slider">
+                                <div id="b-const" class="const">B</div>
+                                <input id="b-input" class="val-input" type="range" min="0" max="255" val="0">
+                                <div id="b-val" class="val">0</div>
+                            </div>
+                            <br>
+                            <div class="color-slider" id="h-slider">
+                                <div id="h-const" class="const">H</div>
+                                <input id="h-input" class="val-input" type="range" min="0" max="360" val="0">
+                                <div id="h-val" class="val">0</div>
+                            </div>
+                            <div class="color-slider" id="s-slider">
+                                <div id="s-const" class="const">S</div>
+                                <input id="s-input" class="val-input" type="range" min="0" max="100" val="100">
+                                <div id="s-val" class="val">100</div>
+                            </div>
+                            <div class="color-slider" id="v-slider">
+                                <div id="v-const" class="const">V</div>
+                                <input id="v-input" class="val-input" type="range" min="0" max="100" val="100">
+                                <div id="v-val" class="val">100</div>
                             </div>
                         </div>
                     </div>

@@ -57,10 +57,13 @@
     background-color: #333333;
 }
 
+#color-widget {
+    background: #333333;
+}
+
 #color-picker {
     height: 170px;
     width: 200px;
-    background: #333333;
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -99,4 +102,28 @@
     border: 2px solid gray;
     position: absolute;
     background: hsl(0deg, 100%, 50%);
+}
+
+
+.color-slider {
+    color: lightgray;
+    padding-left: 5px;
+    padding-right:5px;
+    padding-bottom: 3px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+
+.const {
+    width: 11px;
+}
+
+.val {
+    width: 25px;
+}
+
+.val-input {
+    width: 130px;
 }

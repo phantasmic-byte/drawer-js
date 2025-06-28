@@ -16,10 +16,15 @@ let canvasTemp: HTMLCanvasElement, ctxTemp: CanvasRenderingContext2D, dpiTemp;
 let radius = 10;
 
 let gradientSquare: HTMLDivElement, hueRect: HTMLDivElement;
-
 let gradientPicker: HTMLDivElement, huePicker: HTMLDivElement;
 
 let hue: number, saturation: number, lightness: number;
+
+let rInput: HTMLInputElement, gInput: HTMLInputElement, bInput: HTMLInputElement;
+let rVal: HTMLDivElement, gVal: HTMLDivElement, bVal: HTMLDivElement;
+
+let hInput: HTMLInputElement, sInput: HTMLInputElement, vInput: HTMLInputElement;
+let hVal: HTMLDivElement, sVal: HTMLDivElement, vVal: HTMLDivElement;
 
 let width = 700;
 let height = 350;
@@ -329,6 +334,10 @@ function percent(t: number, v0: number, v1: number): number {
     }
 }
 function setSaturationLightness(top: number, left: number) {
+    console.log('top');
+    console.log(top);
+    console.log('left');
+    console.log(left);
     const value = 1 - percent(top, gradientSquare.offsetTop, gradientSquare.offsetTop + gradientSquare.offsetHeight);
     const hsvSaturation = percent(left, gradientSquare.offsetLeft, gradientSquare.offsetLeft + gradientSquare.offsetWidth);
 
@@ -342,6 +351,10 @@ function setSaturationLightness(top: number, left: number) {
     
     lightness *= 100;
     saturation *= 100;
+    console.log('light');
+    console.log(lightness);
+    console.log('hsvSat');
+    console.log(hsvSaturation);
 }
 
 const handleGradientSquarePointerMove = (e: PointerEvent) => {
@@ -410,7 +423,7 @@ function setupColorPicker() {
     gradientSquare.addEventListener('pointerup', (e: PointerEvent) => {
         gradientSquare.removeEventListener('pointermove', handleGradientSquarePointerMove); 
         setGradientPickerLocationColor(e);
-    })
+    });
     
     placeDiv(
         gradientSquare.offsetTop,
@@ -445,13 +458,123 @@ function setupColorPicker() {
     });
 }
 
+const setR =  () => {
+    rVal.textContent = rInput.value;
+    setRGB();
+}
+
+const setG =  () => {
+    gVal.textContent = gInput.value;
+    setRGB();
+}
+
+
+const setB =  () => {
+    bVal.textContent = bInput.value;
+    setRGB();
+}
+
+function setRGB () {
+    const rgb = [+rInput.value, +gInput.value, +bInput.value];
+
+    const maxIndex = rgb.reduce((max, x, i, a) => x > a[max] ? i : max, 0);
+    
+    const rgbPrimeMax = rgb[maxIndex];
+    const rgbPrimeMin = Math.min(rgb[0], Math.min(rgb[1], rgb[2]));
+   
+    const delta = (rgbPrimeMax - rgbPrimeMin);
+
+    switch (delta == 0 ? -1 : maxIndex) {
+        case -1: {
+            hue = 0;
+            break;
+        }
+        case 0: {
+            hue = 60 * (((rgb[1] - rgb[2]) / delta) % 6);
+            break;
+        } case 1: { 
+            hue = 60 * (((rgb[2] - rgb[0]) / delta) + 2);
+            break;
+        } case 2: {
+            hue = 60 * (((rgb[0] - rgb[1]) / delta) + 4);
+            break;
+        } default: {
+            break
+        }
+    }
+    
+    saturation = rgbPrimeMax == 0 ? 0 : 
+        delta / rgbPrimeMax;
+    const value = rgbPrimeMax / 255;
+    
+    // Set hue placement
+    placeDiv(
+        hueRect.offsetTop + Math.abs(hue) / 360  * hueRect.offsetHeight,
+        huePicker.offsetHeight / 2,
+        hueRect.offsetLeft,
+        (huePicker.offsetWidth - huePicker.clientWidth) / 2,
+        huePicker,
+        hueRect
+    );
+    
+    const hueStyle = 'hsl(' + Math.round(hue) + ', 100%, 50%)';
+
+    huePicker.style.background = hueStyle;
+    gradientSquare.style.background = 
+        'linear-gradient(transparent 0%, hsl(0deg, 0%, 0%) 100%),' + 
+        'linear-gradient(to left, transparent 0%, hsl(0deg, 0%, 100%) 100%),' +
+        hueStyle;
+    gradientPicker.style.background = 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')';
+
+    // Set saturation and value placement
+    placeDiv(
+        gradientSquare.offsetTop + (1 - value) * gradientSquare.offsetHeight, 
+        gradientPicker.offsetHeight / 2, 
+        gradientSquare.offsetLeft + (saturation) * gradientSquare.offsetWidth,
+        gradientPicker.offsetWidth / 2, 
+        gradientPicker,
+        gradientSquare
+    );
+
+    setSaturationLightness(gradientPicker.clientTop, gradientPicker.clientLeft);
+}
+
+
+function setupColorSliders() {
+    rVal = document?.getElementById('r-val') as HTMLInputElement;
+    gVal = document?.getElementById('g-val') as HTMLInputElement;
+    bVal = document?.getElementById('b-val') as HTMLInputElement;
+    hVal = document?.getElementById('h-val') as HTMLInputElement;
+    sVal = document?.getElementById('s-val') as HTMLInputElement;
+    vVal = document?.getElementById('v-val') as HTMLInputElement;
+    
+    rInput = document?.getElementById('r-input') as HTMLInputElement;
+    gInput = document?.getElementById('g-input') as HTMLInputElement;
+    bInput = document?.getElementById('b-input') as HTMLInputElement;
+    hInput = document?.getElementById('h-input') as HTMLInputElement;
+    sInput = document?.getElementById('s-input') as HTMLInputElement;
+    vInput = document?.getElementById('v-input') as HTMLInputElement;
+    
+    rInput.value = '255';
+    gInput.value = '0';
+    bInput.value = '0';
+    hInput.value = '0';
+    sInput.value = '100';
+    vInput.value = '100';
+    
+    rInput.addEventListener('change', setR);
+    gInput.addEventListener('change', setG);
+    bInput.addEventListener('change', setB);
+    
+}
+
 const setup = () => {
     console.log("Setting Up");
     setupCanvas();
     setupSlider();
-    setupStrokeColorElement();
     setupButtons();
     setupColorPicker();
+    setupColorSliders();
 
     console.log("window loaded");
 }
