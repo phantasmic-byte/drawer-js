@@ -63,7 +63,7 @@
 
 #color-picker {
     height: 170px;
-    width: 200px;
+    width: 250px;
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -72,7 +72,7 @@
 }
 
 #gradient-square {
-    width: 150px;
+    width: 200px;
     height: 150px;
 
     background: linear-gradient(transparent 0%, hsl(0deg, 0%, 0%) 100%), 
@@ -120,10 +120,10 @@
     width: 11px;
 }
 
-.val {
-    width: 25px;
+.val-input {
+    width: 45px;
 }
 
-.val-input {
-    width: 130px;
+.val-input-range {
+    width: 160px;
 }
