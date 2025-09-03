@@ -68,17 +68,13 @@ let currentShape: Shape | null = null;
 const commands = new Commands();
 
 const handlePointerDown = (e: PointerEvent) => {
-    console.log("mouse down");
     isMouseDown = true;
-    console.log(getCanvasX(e) + "," + getCanvasY(e));
-
     const canvasX = getCanvasX(e), canvasY = getCanvasY(e);
     currentShape = null;
     
     switch (currentMode) {
         case 'stroke': {
             currentShape = new Stroke();
-            console.log(currentShape);
             if (!(currentShape instanceof Stroke)) {
                 break;
             }
@@ -118,13 +114,9 @@ const handlePointerMove = (e: PointerEvent) => {
     
     clearTempCanvas();
     const canvasX = getCanvasX(e), canvasY = getCanvasY(e);
-    console.log("mouse moving");
 
-    console.log(currentShape);
-    console.log(currentMode);
     switch (currentMode) {
         case 'stroke': {
-    console.log('stroke');
             if (!(currentShape instanceof Stroke)) {
                 break;
             }
@@ -132,7 +124,6 @@ const handlePointerMove = (e: PointerEvent) => {
             break;
         }
         case 'ellipse': {
-    console.log('ellipse');
             if (!(currentShape instanceof Ellipse)) {
                 break;
             }
@@ -143,7 +134,6 @@ const handlePointerMove = (e: PointerEvent) => {
             break;
         }
         case 'rect': {
-    console.log('rect');
             if (!(currentShape instanceof Rect)) {
                 break;
             }
@@ -154,22 +144,16 @@ const handlePointerMove = (e: PointerEvent) => {
             break;
         }
     }
-    console.log("after");
     currentShape?.draw(ctxTemp);
     addPointerDownUpCallback();
 }
 
 const handlePointerUp = (e: PointerEvent) => {
-    console.log("mouse up");
     isMouseDown = false;
 
     const canvasX = getCanvasX(e), canvasY = getCanvasY(e);
-    console.log(canvasX + ',' + canvasY);
-    console.log(currentMode);
     switch (currentMode) {
         case 'stroke': {
-            console.log('stroke');
-            console.log(currentShape);
             if (!(currentShape instanceof Stroke)) {
                 return;
             }
@@ -181,8 +165,6 @@ const handlePointerUp = (e: PointerEvent) => {
 
         }
         case 'ellipse': {
-            console.log('ellipse x');
-            console.log(currentShape);
             if (!(currentShape instanceof Ellipse)) {
                 return;
             }
@@ -191,8 +173,6 @@ const handlePointerUp = (e: PointerEvent) => {
             break;
         }
         case 'rect': {
-            console.log('rect');
-            console.log(currentShape);
             if (!(currentShape instanceof Rect)) {
                 return;
             }
@@ -228,7 +208,6 @@ function setupSlider()  {
     slider = document.getElementById('slider') as HTMLInputElement;
     slider?.addEventListener('input', () => {
         ctx.lineWidth = +slider.value;
-        console.log(radius);
     });
 }
 
@@ -277,31 +256,28 @@ function setupButtons() {
         btn.addEventListener('click', () => {
 
             function deselect(button: HTMLDivElement) {
-                console.log(button);
                 button.classList.remove('selected');
                 button.classList.add('not-selected');
             }
 
             function select(button: HTMLDivElement) {
-                console.log(button);
                 button.classList.remove('not-selected');
                 button.classList.add('selected');
             }
             
             deselect(selectedBtn);
             select(btn);
+            selectedBtn = btn;
             currentMode = btn.id;
         });
     }
 }
 
 function addPointerDownUpCallback() {
-    console.log("adding up down callback");
     document?.addEventListener('pointerdown', handlePointerDown);
     document?.addEventListener('pointerup', handlePointerUp);
 }
 function removePointerDownUpCallBack() {
-    console.log("removing up down callback");
     document?.removeEventListener('pointerdown', handlePointerDown);
     document?.removeEventListener('pointerup', handlePointerUp);
 }
@@ -335,18 +311,21 @@ function percent(t: number, v0: number, v1: number): number {
 }
 
 function setGradientPickerBackground() {
+    console.log(hue);
+    console.log(saturation);
+    console.log(lightness);
     gradientPicker.style.background = 'hsl(' + Math.round(hue) + 'deg,' 
         + Math.round(saturation) + '%,' + Math.round(lightness) + '%)';
+    console.log(gradientPicker.style.background);
 }
 
-function setSaturationLightness(top: number, left: number) {
-    console.log('top');
-    console.log(top);
-    console.log('left');
-    console.log(left);
+function setSaturationLightnessFromGradientBox(top: number, left: number) {
     const value = 1 - percent(top, gradientSquare.offsetTop, gradientSquare.offsetTop + gradientSquare.offsetHeight);
     const hsvSaturation = percent(left, gradientSquare.offsetLeft, gradientSquare.offsetLeft + gradientSquare.offsetWidth);
+    setSaturationLightness(value, hsvSaturation);
+}
 
+function setSaturationLightness(value: number, hsvSaturation: number) {
     lightness = value * (1 - (hsvSaturation / 2));
 
     if (lightness == 0 || lightness == 100) {
@@ -357,10 +336,6 @@ function setSaturationLightness(top: number, left: number) {
     
     lightness *= 100;
     saturation *= 100;
-    console.log('light');
-    console.log(lightness);
-    console.log('hsvSat');
-    console.log(hsvSaturation);
 }
 
 const handleGradientSquarePointerMove = (e: PointerEvent) => {
@@ -368,29 +343,46 @@ const handleGradientSquarePointerMove = (e: PointerEvent) => {
 };
 
 
-function setGradientPickerLocationColor(xPos: number, yPos: number) {
+function setGradientPickerFromInput() {
+    const xPos = (+sInput.value * gradientSquare.offsetWidth / 100) + gradientSquare.offsetLeft;
+    const yPos = (+vInput.value * gradientSquare.offsetHeight / 100) + gradientSquare.offsetTop;
+    setGradientPicker(xPos, yPos);
+}
+
+function setGradientPicker(xPos: number, yPos:number) {
     placeDiv(
         yPos, gradientPicker.offsetHeight / 2,
         xPos, gradientPicker.offsetWidth / 2, 
         gradientPicker,
         gradientSquare
     );
-    setSaturationLightness(yPos, xPos);
+    setSaturationLightnessFromGradientBox(yPos, xPos);
     setGradientPickerBackground(); 
     ctx.strokeStyle = gradientPicker.style.background;
+}
 
+
+function setGradientPickerLocationColor(xPos: number, yPos: number) {
+    setGradientPicker(xPos, yPos);
+    
     const newSaturation = (xPos - gradientSquare.offsetLeft) / gradientSquare.offsetWidth;
-    const newValue = (gradientSquare.offsetHeight - (yPos - gradientSquare.offsetTop)) / gradientSquare.offsetHeight; 
-    sInput.value = Math.round(newSaturation * 100) + "";
-    sInputRange.value = Math.round(newSaturation * 100) + "";
-    vInput.value = Math.round(newValue * 100) + "";
-    vInputRange.value = Math.round(newValue * 100) + "";
-    console.log(hue);
-    console.log(newSaturation);
-    console.log(newValue);
+    const newValue = ((yPos - gradientSquare.offsetTop)) / gradientSquare.offsetHeight; 
+    setSaturationInputs(Math.round(newSaturation * 100) + "");
+    setValueInputs(Math.round((1 - newValue) * 100) + "");
+    
     setRGBSlidersFromHSV(hue, 
         newSaturation,
         newValue);
+}
+
+function setSaturationInputs(saturationString: string) {
+    sInput.value = saturationString;
+    sInputRange.value = sInput.value;
+}
+
+function setValueInputs(valueString: string) {
+    vInput.value = valueString;
+    vInputRange.value = vInput.value;
 }
 
 function handleHueRectPointerMove(e: PointerEvent) {
@@ -420,10 +412,6 @@ function setHuePickerLocationColor(yPos: number) {
         hueStyle;
 
     ctx.strokeStyle = gradientPicker.style.background;
-    console.log('setHuePicker');
-    console.log(hue);
-    console.log(sInput.value);
-    console.log(vInput.value)
     setRGBSlidersFromHSV(hue, (+sInput.value) / 100, (+vInput.value) / 100); 
     hInput.value = Math.round(hue) + "";
     hInputRange.value = Math.round(hue) + "";
@@ -461,7 +449,7 @@ function setupColorPicker() {
     // Set up hue rectangle
     hueRect = document.getElementById('hue-rect') as HTMLDivElement;
     huePicker = document.getElementById('hue-picker') as HTMLDivElement;
-    
+
     placeDiv(
         hueRect.offsetTop,
         huePicker.offsetHeight / 2,
@@ -480,6 +468,8 @@ function setupColorPicker() {
         hueRect.removeEventListener('pointermove', handleHueRectPointerMove);
         setHuePickerLocationColor(e.clientY);
     });
+    
+    
 }
 
 function setRGB () {
@@ -498,21 +488,30 @@ function setRGB () {
             break;
         }
         case 0: {
-            hue = 60 * (((rgb[1] - rgb[2]) / delta) % 6);
+            console.log("case 0");
+            var mod = ((rgb[1] - rgb[2]) / delta) % 6;
+            if (mod < 0) {
+                mod +=6;
+                mod %=6;
+            }
+            hue = 60 * mod;
             break;
         } case 1: { 
+            console.log("case 1");
             hue = 60 * (((rgb[2] - rgb[0]) / delta) + 2);
             break;
         } case 2: {
+            console.log("case 2");
             hue = 60 * (((rgb[0] - rgb[1]) / delta) + 4);
             break;
         } default: {
-            break
+            break;
         }
     }
     
     saturation = rgbPrimeMax == 0 ? 0 : 
         delta / rgbPrimeMax;
+    console.log(saturation);
     const value = rgbPrimeMax / 255;
     
     // Set hue placement
@@ -548,7 +547,7 @@ function setRGB () {
         Math.round(saturation * 100), 
         Math.round((1 - value) * 100));
 
-    setSaturationLightness(gradientPicker.clientTop, gradientPicker.clientLeft);
+    setSaturationLightnessFromGradientBox(gradientPicker.offsetTop, gradientPicker.offsetLeft);
 }
 
 function setRGBSlidersFromHSV(h: number, s: number, v: number) {
@@ -590,7 +589,6 @@ function setRGBSlidersFromHSV(h: number, s: number, v: number) {
 }
 
 function setHSVSliders(h: number, s: number, v:number) {
-    console.log('settting hsv sliders');
     hInput.value = Math.round(h) + "";
     sInput.value = Math.round(s) + "";
     vInput.value = Math.round(v) + "";
@@ -634,6 +632,7 @@ function setupColorSliders() {
     rInputRange.addEventListener('change', () => {
         rInput.value = rInputRange.value;
         setRGB();    
+        console.log(saturation);
     });
     gInputRange.addEventListener('change', () => {
         gInput.value = gInputRange.value;
@@ -665,17 +664,13 @@ function setupColorSliders() {
     });
     sInputRange.addEventListener('change', () => {
         sInput.value = sInputRange.value;
-        setGradientPickerLocationColor(
-            (+sInput.value * gradientSquare.offsetWidth / 100) + gradientSquare.offsetLeft,
-            gradientPicker.offsetTop
-        );    
+        setGradientPickerFromInput();  
+        setRGBSlidersFromHSV(hue, +sInput.value / 100, +vInput.value / 100);
     });
     vInputRange.addEventListener('change', () => {
         vInput.value = vInputRange.value;
-        setGradientPickerLocationColor(
-            gradientPicker.offsetLeft,
-            (+vInput.value * gradientSquare.offsetHeight / 100) + gradientSquare.offsetTop
-        )
+        setGradientPickerFromInput();
+        setRGBSlidersFromHSV(hue, +sInput.value / 100, +vInput.value / 100);
     });
     
     hInput.addEventListener('change', () => {
@@ -685,32 +680,30 @@ function setupColorSliders() {
     });
     sInput.addEventListener('change', () => {
         sInputRange.value = sInput.value;
-        setGradientPickerLocationColor(
-            (+sInput.value * gradientSquare.offsetWidth / 100) + gradientPicker.offsetLeft,
-            gradientPicker.offsetTop
-        );    
+        setGradientPickerFromInput();    
+        setRGBSlidersFromHSV(hue, +sInput.value / 100, +vInput.value / 100);
     });
     vInput.addEventListener('change', () => {
         vInputRange.value = vInput.value;
-        setGradientPickerLocationColor(
-            gradientPicker.offsetLeft,
-            (+vInput.value * gradientSquare.offsetHeight / 100) + gradientSquare.offsetTop
-        )
+        setGradientPickerFromInput(); 
+        setRGBSlidersFromHSV(hue, +sInput.value / 100, +vInput.value / 100);
     });
  
 }
 
 const setup = () => {
-    console.log("Setting Up");
     setupCanvas();
     setupSlider();
     setupButtons();
     setupColorPicker();
     setupColorSliders();
 
-    console.log("window loaded");
+    ctx.strokeStyle = 'hsl(0deg, 100%, 50%)';
 }
 
+
+
+window?.addEventListener('resize', (event) => {console.log(event)});
 document?.addEventListener('DOMContentLoaded', () => {setup()});
 addPointerDownUpCallback();
 document?.addEventListener('pointermove', handlePointerMove);

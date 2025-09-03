@@ -24,7 +24,6 @@ export class Stroke extends Shape {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        console.log(this.points);
         if (this.points.length === 0) {
             return;
         }
